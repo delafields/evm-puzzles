@@ -26,3 +26,8 @@ This requires knowledge of `xor`s, a binary operation. We can re-write our formu
 Ooh ok, this one is a little more involved. We supply a `CALLVALUE` which gets duped (`DUP1`), those two then get multiplied (`MUL`). Then, a two byte 0100 is pushed to the top of the stack (`PUSH2`) which must equal what we got from the `MUL` (`EQ`). Lastly, 12 (0C) is pushed to the top of the stack and `JUMPI` conditionally takes us to `JUMPDEST` if the result of `EQ` == **1**.
 
 So to crack this, we just need to make the `sqrt(CALLVALUE) == PUSH2 0100`, **where 0100 = 256** in decimal. This evaluates to **16**.
+
+## Lesson 6
+New opcode `CALLDATALOAD`! The first two steps do the following: `CALLDATALOAD` takes the input at the top of the stack 00 (from `PUSH1 00`) and returns call data from that byte onward. So in our case, that's byte 0-32 - this gets right padded btw. We need to send `JUMP` to 10 (`0A`), which means that our 32 byte calldata must evaluate to 10.
+
+Because calldata gets right padded we can't just enter `0x0a`, so to solve this, enter `0x000000000000000000000000000000000000000000000000000000000000000a`.
