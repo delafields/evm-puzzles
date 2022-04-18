@@ -31,3 +31,8 @@ So to crack this, we just need to make the `sqrt(CALLVALUE) == PUSH2 0100`, **wh
 New opcode `CALLDATALOAD`! The first two steps do the following: `CALLDATALOAD` takes the input at the top of the stack 00 (from `PUSH1 00`) and returns call data from that byte onward. So in our case, that's byte 0-32 - this gets right padded btw. We need to send `JUMP` to 10 (`0A`), which means that our 32 byte calldata must evaluate to 10.
 
 Because calldata gets right padded we can't just enter `0x0a`, so to solve this, enter `0x000000000000000000000000000000000000000000000000000000000000000a`.
+
+## Lesson 7
+Definitely the most steps we've seen so far! Skipping to the `CREATE` code - this takes the top of the stack `[value offset size]` and then pushes the address that the account was deployed to to the top of the stack. Next, `EXTCODESIZE` returns the size of the code at that address, followed by a `PUSH 01` and `EQ`. 
+
+Bringing it all together, we need to enter calldata such that the code size is equal to **01 byte**. After some brute forcing on [evm.codes](https://www.evm.codes/playground?unit=Wei&codeType=Mnemonic&code=%27y1z10z10twwy2v32%200xssssz2t%27~uuuuzv1%20y%2F%2F%20Example%20w%5CnvwPUSHuFFtwMULs~~%01stuvwyz~_), `0x60016000526001601ff3` solved it for me.
