@@ -36,3 +36,14 @@ Because calldata gets right padded we can't just enter `0x0a`, so to solve this,
 Definitely the most steps we've seen so far! Skipping to the `CREATE` code - this takes the top of the stack `[value offset size]` and then pushes the address that the account was deployed to to the top of the stack. Next, `EXTCODESIZE` returns the size of the code at that address, followed by a `PUSH 01` and `EQ`. 
 
 Bringing it all together, we need to enter calldata such that the code size is equal to **01 byte**. After some brute forcing on [evm.codes](https://www.evm.codes/playground?unit=Wei&codeType=Mnemonic&code=%27y1z10z10twwy2v32%200xssssz2t%27~uuuuzv1%20y%2F%2F%20Example%20w%5CnvwPUSHuFFtwMULs~~%01stuvwyz~_), `0x60016000526001601ff3` solved it for me.
+
+## Lesson 8
+We see a very similar `CALLDATASIZE PUSH1 00 DUP1 CALLDATACOPY CALLDATASIZE PUSH1 00 PUSH1 00 CREATE`, which just creates a new contract from the calldata and returns a deployment address. At this point we have a stack that looks like: `[address_deployed 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]`. 
+
+The next 5 instructions have to do with the `CALL` instruction which executes the code of the given account in a new subcontext. This opcode expects the following at the top of the stack: `[gas address value argsOffset argsSize retOffset retSize]`.
+
+After the next `PUSH1` and `DUP1`'s, our stack looks like this `[0 0 0 0 0 address_deployed 0 0 0 0 0 0 0 0 0 0]`. Then, we get to the `SWAP5` opcode which swaps stack item 1 <-> 6 and finally `CALL` is executed which returns **0** if reverted or **1** on success. 
+
+After the `CALL` instructions we see `PUSH 00 EQ`, meaning we need `CALL` to push a **0** onto the stack. 
+
+To solve, pass in calldata with a bytecode sequence such that the return value of the sequence causes a REVERT when run, ex: **0x60016000526001601ff3**
