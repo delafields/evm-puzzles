@@ -47,3 +47,10 @@ After the next `PUSH1` and `DUP1`'s, our stack looks like this `[0 0 0 0 0 addre
 After the `CALL` instructions we see `PUSH 00 EQ`, meaning we need `CALL` to push a **0** onto the stack. 
 
 To solve, pass in calldata with a bytecode sequence such that the return value of the sequence causes a REVERT when run, ex: **0x60016000526001601ff3**
+
+## Lesson 9
+Getting past the first `JUMP` is super simple. We just need to provide `CALLDATASIZE` such that `LT` evaluates to 1. Because `PUSH 03` is put to the top of the stack, providing something > 3 will suffice.
+
+To get through the next `JUMPI`, we need to ensure that when `CALLVALUE` & `CALLDATASIZE` are `MUL`tiplied together, they `EQ`ual **8** (given the `PUSH1 08`). 
+
+To solve, enter value **2** and calldata **0xffffffff**.
